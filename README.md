@@ -1,68 +1,95 @@
 # IMDb Lists Marker
 
-سكربت متصفح يلوّن روابط الأفلام والأشخاص الموجودة في قوائمك على IMDb، ويحفظ البيانات داخل المتصفح نفسه.
+Userscript that colors IMDb links for titles and people already in your lists. Version `1.66`. License `GPL-3.0-or-later`.
 
-الإصدار الحالي: `1.66`  
-الترخيص: `GPL-3.0-or-later`  
-الملف: `imdb-lists-marker.user.js`
+The file is `imdb-lists-marker.user.js`.
 
-مبني على سكربت `IMDb 'My Movies' enhancer` لـ Ricardo Mendonça Ferreira، والمنشور على OpenUserJS:
+Based on IMDb 'My Movies' enhancer by Ricardo Mendonça Ferreira (AltoRetrato), GPL-3.0-or-later:
 
 https://openuserjs.org/scripts/AltoRetrato/IMDb_My_Movies_enhancer
 
-## ماذا يفعل
+## What it does
 
-- يعمل على صفحات `imdb.com`، ما عدا مجلد الصور.
-- على صفحة قوائمك، إذا كنت صاحب الحساب، يضيف ثلاثة أزرار تحت العنوان:
-  - `Refresh highlight data` ينزّل قوائمك إلى هذا المتصفح.
-  - `Clear highlight data` يمسح البيانات المحفوظة ثم يعيد تحميل الصفحة.
-  - `What's this?` يعرض شرحاً قصيراً.
-- بعد أول تنزيل، صفحات IMDb الأخرى تستخدم البيانات المحفوظة فقط. لا يعاد تنزيل القوائم في كل زيارة.
-- يلوّن روابط الأفلام (`/title/tt…`) وروابط الأشخاص (`/name/nm…`) ويجعل الخط عريضاً.
-- في صفحة العمل أو الشخص نفسه يلوّن العنوان الرئيسي إذا كان موجوداً في قوائمك.
-- عند تمرير المؤشر يظهر تلميح بأسماء القوائم. في التقييمات تظهر درجتك ودرجة IMDb.
+It runs on `imdb.com`, except the images folder.
 
-## الألوان
+After the lists are saved in this browser, a link is colored and made bold when that title or person is already in one of your lists. On the title page or the person page, the main heading is colored the same way.
 
-| القائمة | اللون |
+Hover a colored link. The tooltip names the list. A rating also shows your score and the IMDb score.
+
+The pictures below are from The Shawshank Redemption after the script painted links that were already stored. Gold is the watchlist. Green is your ratings. Magenta is a people list you created.
+
+The film title is in the watchlist. The tooltip is the one the script shows on hover.
+
+![The film title colored for the watchlist, with the script tooltip](images/title-tooltip.png)
+
+People in one of your people lists. The tooltip names that list.
+
+![Top cast names colored because those people are in a list](images/top-cast.png)
+
+Titles in More like this. Gold is the watchlist. Green is your ratings. The tooltip is the one shown for a rated title.
+
+![Similar films colored gold or green, with the ratings tooltip](images/more-like-this.png)
+
+## Colors
+
+| List | Color |
 | --- | --- |
 | Your Watchlist | DarkGoldenRod |
 | Your ratings | Green |
 | Your check-ins | DarkGreen |
-| قوائم الأفلام التي تنشئها | DarkCyan |
-| قوائم الأشخاص التي تنشئها | DarkMagenta |
+| Title lists you create | DarkCyan |
+| People lists you create | DarkMagenta |
 
-إذا وُجد العمل في أكثر من قائمة، يظهر لون القائمة الأعلى في الترتيب. قائمتا المشاهدة والتقييم تأتيان أولاً.
+If a title is in more than one list, the color comes from the first matching list. Your Watchlist and Your ratings are checked first.
 
-## من أين تأتي البيانات
+## Steps so it works
 
-التنزيل يجمع:
+1. Install Tampermonkey or Violentmonkey.
+2. Install `imdb-lists-marker.user.js`.
+3. Sign in on IMDb.
+4. Open your own lists page. The address looks like this:
 
-- `Your Watchlist`
-- `Your ratings`
-- `Your check-ins`
-- قوائمك الخاصة من نوع أفلام أو أشخاص
+https://www.imdb.com/user/ur00000000/lists/
 
-قوائم الصور والفيديو تُتجاهل. القراءة تتم عبر GraphQL من `caching.graphql.imdb.com`، ومع صفحات القوائم نفسها عند الحاجة. قائمة التقييمات تُحمَّل على دفعات، والتبويب يبقى مفتوحاً حتى يكتمل العد.
+5. Under the heading, the script adds three buttons. Press `Refresh highlight data` once.
 
-المعرّفات تُحفظ مختصرة داخل `localStorage` تحت مفتاح يبدأ بـ `myMovies-` ومعرّف المستخدم. المستخدم النشط يُحفظ في `myMovies-active-user`.
+![Refresh highlight data, Clear highlight data, and What's this](images/lists-buttons.png)
 
-## التحديث التلقائي
+6. Wait until the status line finishes the count. A long ratings list is loaded page by page. Keep that tab open until it finishes.
+7. Open any other IMDb page. Those pages use only the copy saved in this browser. They do not download the lists again.
 
-لا يعمل بمؤقّت والصفحة مفتوحة. الفحص يحدث مرة واحدة عند تحميل أي صفحة على IMDb.
+`Clear highlight data` deletes the saved copy and reloads the page. You then need `Refresh highlight data` again before colors come back.
 
-لا يبدأ أبداً قبل أول ضغطة على `Refresh highlight data`. بعد تنزيل مكتمل يُكتب الوقت في `myMovies-refreshed-at`. في الزيارة التالية:
+`What's this?` prints the short note in the picture above.
 
-- إذا لم تمر أربع وعشرون ساعة، لا يحدث تنزيل.
-- إذا مرّت، وأنت مسجّل الدخول، يبدأ التنزيل في الخلفية ثم يُعاد التلوين.
+The three buttons appear only on your own lists page, and only while you are the owner of that page.
 
-إذا كان المتصفح مفتوحاً والموقع غير مفتوح في أي تبويب، لا يحدث شيء. السكربت لا يعمل إلا داخل صفحات `imdb.com`.
+## Where the data comes from
 
-قفل `myMovies-refresh-lock` لعشر دقائق يمنع تشغيل تحديثين معاً من تبويبين فُتحا في اللحظة نفسها.
+The first download reads:
 
-## التثبيت
+- Your Watchlist
+- Your ratings
+- Your check-ins
+- Title lists and people lists you created
 
-1. ثبّت Tampermonkey أو Violentmonkey.
-2. أنشئ سكربتاً جديداً.
-3. الصق محتوى `imdb-lists-marker.user.js`.
-4. احفظ، ثم افتح صفحة قوائمك على IMDb واضغط `Refresh highlight data` مرة واحدة.
+Image lists and video lists are skipped.
+
+The download uses GraphQL at `https://caching.graphql.imdb.com/`, and the list pages themselves when a list needs the HTML fallback. Ratings are read in batches.
+
+Ids are stored shortened in `localStorage`. The saved copy for the signed-in user is under a key that starts with `myMovies-` plus that user id. The active user is `myMovies-active-user`. The time of the last finished download is `myMovies-refreshed-at`.
+
+## Automatic refresh
+
+There is no timer. The check runs once, when an IMDb page loads.
+
+It never starts before the first successful `Refresh highlight data`. That button is what writes `myMovies-refreshed-at`.
+
+On a later IMDb page:
+
+- If 24 hours have not passed, nothing is downloaded.
+- If 24 hours have passed, you are signed in, and a saved copy already exists, the download starts in the background and the colors are painted again.
+
+An open browser with no IMDb tab does nothing. The script runs only inside `imdb.com`.
+
+`myMovies-refresh-lock` blocks a second download for 10 minutes, so two tabs opened at the same moment do not both download.
